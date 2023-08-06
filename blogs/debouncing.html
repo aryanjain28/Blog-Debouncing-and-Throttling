@@ -1,0 +1,402 @@
+<html>
+  <head>
+    <title>Debouncing & Throttling in React</title>
+    <link rel="stylesheet" href="./debouncing.css" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Baskervville|Muli&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Cookie&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto+Slab&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="mainBorder">
+      <div id="mainHeading">Debouncing & Throttling in React</div>
+
+      <div id="mainBody">What is it exactly? Where and why is it used?</div>
+
+      <div id="majorHeading">The "What"</div>
+
+      <div id="mainBody">
+        In essence, when we require a function to execute following a specified
+        delay period, we refer to this as "debouncing." To illustrate, consider
+        a scenario where a user is typing, and once they pause, we intend to
+        initiate a fetch API request. This concept is known as debouncing. You
+        may have encountered this behavior while utilizing search forms for
+        worldwide university searches.
+
+        <br />
+        <br />
+
+        Furthermore, think of a situation where a user continues typing
+        incessantly without pausing. In such instances, we may need to trigger
+        fetch API requests at defined intervals, regardless of whether the user
+        halts or persists. This concept is termed "throttling."
+
+        <br />
+        <br />
+
+        Alright, let's simplify this. Debouncing and throttling are kind of
+        similar. For the rest of this blog, when I talk about debouncing, it
+        also applies to throttling. So, I'll just focus on explaining
+        debouncing.
+      </div>
+
+      <div id="contentImages">
+        <center>
+          <img src="img1.png" width="400" height="" />
+        </center>
+      </div>
+
+      <div id="mainBody">
+        Debouncing might appear simple at first glance. We basically encase our
+        function within a "setTimeout." But hold on a moment – when has React
+        ever been a walk in the park? Yet, once you grasp the concept, it
+        becomes quite straightforward.
+
+        <br />
+        <br />
+
+        Now, let's tackle the question at hand. If we put our function inside a
+        "setTimeout," it will run after a set amount of time, and the timer
+        won't restart. Take a look at the example below.
+      </div>
+      <br /><br />
+
+      <div id="contentImages">
+        <center>
+          <img src="code_img1.png" width="500" height="" />
+        </center>
+      </div>
+
+      <div id="mainBody">
+        This situation is quite straightforward to comprehend – the reason it's
+        not functioning as expected is that it's simply following its
+        instructions. It's been instructed to update the data value after
+        waiting for 1 second (1000 milliseconds). However, this isn't the
+        debouncing behavior we're aiming for. We somehow need to reset the timer
+        back to 1 second each time the user stops typing.
+
+        <br /><br /><br /><br />
+        You can find a tons of resources on the internet explaining how
+        debouncing works with React. I recently encountered a hurdle while
+        incorporating this technique into one of my projects. I hit a point
+        where I felt stuck and didn't know how to proceed. After some searching
+        around, I stumbled upon a helpful solution.
+        <br /><br />
+
+        In my project, I had a specific goal: I wanted to save whatever text the
+        user had typed, but only when they paused in their typing. During my
+        online research, I consistently came across a particular piece of code
+        used for debouncing:
+        <br /><br />
+      </div>
+
+      <div id="contentImages">
+        <center>
+          <img src="code_img2.png" width="700" height="" />
+        </center>
+      </div>
+
+      <div id="mainBody">This is how it will wrap our code:</div>
+
+      <div id="contentImages">
+        <center>
+          <img src="code_img3.png" width="700" height="" />
+        </center>
+      </div>
+
+      <div id="mainBody">
+        Seems quite robust, doesn't it? But here's the catch – it doesn't
+        actually function as intended. Debouncing appears to be on track, as the
+        'timerId' is being reset as expected. However, there's an issue: the
+        data is getting updated with a delay, which is not what we want.
+
+        <br /><br />
+
+        Now, let's dive into what's happening here. Why is it failing to work?
+        The solution is rather straightforward – our data is being updated
+        within the 'handleOnChange' function, which is nested inside the
+        debounce function. It's quite evident that the data update itself is
+        being debounced!
+
+        <br /><br />
+        <br /><br />
+
+        The fix appears to be straightforward: we just need to figure out a way
+        to remove the setData function from within the debounce wrapper!
+
+        <br /><br />
+
+        Inside the debounce wrapper, we should only keep the specific
+        functionality that we want to debounce. Let's do it:
+      </div>
+
+      <div id="contentImages">
+        <center>
+          <img src="code_img4.png" width="700" height="" />
+        </center>
+      </div>
+
+      <div id="mainBody">
+        At this point, everything appears to be in order, and there's a strong
+        expectation that this solution will indeed be effective. After all, this
+        is the precise solution that's commonly found online. The internet is
+        typically reliable in such matters. <br /><br />
+        However, after giving it a try, it turns out that it doesn't function as
+        expected.
+      </div>
+
+      <div id="mainBody">
+        Umm. But why? Everything looked fine to me.
+        <br /><br />
+        <i>My thought process:</i>
+        <br /><br />
+        Ok. Take a deep breath.
+        <br /><br />
+        Now. What's happening?
+        <br /><i
+          >=> So, the data is updating fine, but the debounce function is not.
+        </i>
+        <br /><br />
+
+        And, what's wrong with the debounced function?<br />
+        <i
+          >=> It runs each time with a delay, it doesn't override the previous
+          run, which it is supposed to do.</i
+        >
+        <br /><br />
+
+        Hmm. So it seems like its not resetting, more specifically, its not
+        resetting the timerId.
+        <br /><i
+          >=> Indeed, after staring at screen for a few hours, I found the
+          same.TIMER_ID was always undefined, it is supposed to update with the
+          latest one.</i
+        >
+
+        <div id="contentImages">
+          <center>
+            <img src="img2.png" width="300" height="" />
+          </center>
+        </div>
+
+        <div id="mainBody">
+          Upon closer examination, I discovered the culprit: it's all about
+          RE-RENDERING! Once I realized this, I couldn't help but wonder how I
+          overlooked such a crucial detail. Here's the deal: the moment we
+          trigger the onChange event and set the data to the new value, the
+          component undergoes a re-render, causing the timerId to vanish.
+          Without the timerId, there's no resetting, and consequently, no
+          debouncing.
+          <br /><br />
+          However, I wasn't ready to give up just yet. I believed there had to
+          be a solution – after all, how challenging could it be? So, I delved
+          into my search once more. To my surprise, everything I came across
+          pointed towards the prebuilt "debounce" function in the lodash
+          library. Undoubtedly, it simplifies matters, but I wanted to create my
+          own custom debouncing wrapper function.
+        </div>
+
+        <div id="mainBody">
+          So, I had a realization: the issue isn't really about re-rendering;
+          it's more about creating a new debounce function every time a
+          re-render occurs. After gazing at my screen for an additional 2 hours,
+          it hit me.
+          <br /><br />
+          I can create a reference of my debounce function using useRef. This
+          should surely give me the previous function. Let’s try this code:
+        </div>
+
+        <div id="contentImages">
+          <center>
+            <img src="code_img5.png" width="600" height="" />
+          </center>
+        </div>
+
+        <div id="mainBody">Complete code:</div>
+
+        <div id="contentImages">
+          <center>
+            <img src="code_img6.png" width="600" height="" />
+          </center>
+        </div>
+
+        <div id="mainBody">
+          Look at it, it looks so sweet!🥺
+          <br /><br />
+          I was so confident with this one! I knew it was the one!
+
+          <br /><br />
+
+          And as it turned out, I celebrated too soon it didn't work!
+        </div>
+
+        <div id="contentImages">
+          <center>
+            <img src="img3.png" width="600" height="" />
+          </center>
+        </div>
+
+        <div id="mainBody">
+          What is wrong now?
+          <br /><br />
+          It seems like my input data is not changing. And it is stuck at the
+          initial point.
+          <br />But why ? <br /><br />
+          Ok. After looking at the screen for another hour, I came to a
+          realization. Our debounce function is invoked just once – during the
+          mounting of our component and the initialization of the ref. To put it
+          differently, if I were to log data within my debounce function, it
+          would remain fixed at the initial value and appear as if it's not
+          changing.
+          <br /><br />
+          But here's the interesting part. I can write a useEffect with "data"
+          as a dependency. This would allow me to update my ref to the latest
+          version of 'functionWeWantToDebounce'. Let's quickly try this:
+        </div>
+
+        <div id="contentImages">
+          <center>
+            <img src="code_img7.png" width="600" height="" />
+          </center>
+        </div>
+
+        <div id="contentImages">
+          <center>
+            <img src="code_img8.png" width="600" height="" />
+          </center>
+        </div>
+
+        <div id="mainBody">
+          But now my debouncing doesn't work. Of course it won't, I am resetting
+          the function on every data change
+          <br /><br />
+          So we're back to square one!
+        </div>
+
+        <div id="contentImages">
+          <center>
+            <img src="img4.png" width="400" height="" />
+          </center>
+        </div>
+
+        <br />
+        .
+        <br />
+        .
+        <br />
+        .
+        <br />
+        .
+        <br />
+        <br />
+
+        <div id="mainBody">
+          Now what?
+          <br /><br />
+          After staring at my screen for another 4 hours (<i>and crying a bit</i
+          >) I found a hint
+
+          <br /><br />
+          warning: burst of thoughts ahead
+          <br />
+
+          <br />
+          We know that, in JavaScript, objects are mutable (can change). And
+          only primitive values, like numbers or references to objects, will be
+          “frozen” when a closure is created. If in our “frozen”
+          (immutable) sendRequest function I will try to access ref.current,
+          which is by definition mutable, I will get the latest version of it
+          all the time! I have a gut feeling that this will work!
+          <br /><br />Let's write code first, and then I'll explain:
+          <br />
+        </div>
+
+        <div id="contentImages">
+          <center>
+            <img src="code_img9.png" width="500" height="" />
+          </center>
+        </div>
+
+        <div id="contentImages">
+          <center>
+            <img src="code_img10.png" width="700" height="" />
+          </center>
+        </div>
+
+        <div id="mainBody">And voila! It works!</div>
+      </div>
+
+      <div
+        class="tenor-gif-embed"
+        data-postid="22894740"
+        data-share-method="host"
+        data-aspect-ratio="2.05128"
+        data-width="100%"
+      >
+        <a
+          href="https://tenor.com/view/rajesh-sharma-proud-ms-dhoni-gif-22894740"
+          >Rajesh Sharma GIF</a
+        >from <a href="https://tenor.com/search/rajesh-gifs">Rajesh GIFs</a>
+      </div>
+      <script
+        type="text/javascript"
+        async
+        src="https://tenor.com/embed.js"
+      ></script>
+
+      <div id="mainBody">
+        <br /><br />
+        So what's happening here? How did it work?
+        <br />
+        <br />
+        1. I made a function called "functionWeWantToDebounce" that triggers a
+        re-render every time it's used. To manage this function, I also set up a
+        reference (let's call it "ref").
+        <br /><br />
+        2. Then, I established another function called "debouncedCallback." This
+        debounced function is only created a single time, specifically during
+        the component's initial mounting.
+        <br /><br />
+        3. Lastly, I provided a separate function (to the debounced function)
+        that can access the most current value in the "ref." This "ref" actually
+        holds the latest version of "functionWeWantToDebounce." This way,
+        everything works smoothly together.
+      </div>
+      <br /><br />
+      <div id="mainBody">
+        Now, the only remaining task is to craft a simple yet effective hook.
+        This hook will package everything mentioned earlier and will be
+        conveniently accessible to envelop our functions wherever needed. Let's
+        go ahead and get that done!
+      </div>
+
+      <div id="contentImages">
+        <center>
+          <img src="code_img11.png" width="700" height="" />
+        </center>
+      </div>
+
+      <div id="mainBody">
+        Sweeeeeet! I hope you like reading this blog / painful story.
+        <br /><br />
+        I wish you all the best!
+        <br /><br />
+        Let's debounce!
+      </div>
+
+      <div id="contentImages">
+        <center>
+          <img src="img5.gif" width="700" height="" />
+        </center>
+      </div>
+    </div>
+  </body>
+</html>
